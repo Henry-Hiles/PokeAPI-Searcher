@@ -1,0 +1,66 @@
+:root {
+	--primary: #14bbaa;
+	--secondary: #2c3c4c;
+}
+
+body {
+    font-size: xx-large !important;
+    background-color: var(--primary);
+	margin: 0;
+    font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+body > div {
+    border-radius: 25px;
+    width: 70%;
+    background-color: white;
+    text-align: center;
+    margin: 200px auto;
+    padding-bottom: 25px;
+    border: 1px solid var(--secondary);
+}
+
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+select {
+    width: 500px;
+    height: 80px;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: inherit;
+}
+
+select, select * {
+    text-transform: capitalize;
+}
+
+.pokemon.not-loaded {
+    display: none;
+}
+
+.pokemon {
+    border: 1px solid var(--secondary);
+    width: 75%;
+    margin: 20px auto;
+}
+
+.pokemon-option {
+    text-transform: capitalize;
+}
+
+.pokemon .img {
+    width: 450px;
+    margin-top: 30px;
+    border: 1px solid var(--secondary);
+}
+
+.pokemon .name {
+    text-transform: capitalize;
+}
+
+.pokemon .types img {
+    margin: 10px;
+    width: 300px;
+}

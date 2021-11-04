@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" asp-append-version="true" href="/site.css" />
+    <title>PokéAPI</title>
+</head>
+
+<body>
+    <div>
+        <h1>PokeAPI</h1>
+        <h3>Choose Pokémon</h3>
+        <select id="select" disabled>
+            <option selected disabled>Please choose a Pokémon</option>
+        </select>
+
+        <div class="pokemon not-loaded">
+            <img class="img">
+            <h2 class="name"></h2>
+            <div class="types">
+
+            </div>
+        </div>
+    </div>
+    <script>
+        const select = document.querySelector( "#select" )
+
+        fetch( `https://pokeapi.co/api/v2/pokemon?limit=9999` )
+            .then( response => {
+                return response.json()
+            } )
+            .then( result => {
+                result.results.forEach( pokemon => {
+                    const element = document.createElement( "option" )
+                    element.innerText = pokemon.name
+                    element.value = pokemon.url
+                    select.appendChild( element )
+                } )
+                select.disabled = false
+            } )
+
+        select.addEventListener( "change", event => {
+            fetch( event.target.value )
+                .then( response => {
+                    return response.json()
+                } )
+                .then( result => {
+                    const pokemon = document.querySelector( ".pokemon" )
+                    pokemon.classList.remove( "not-loaded" )
+                    const img = pokemon.querySelector( ".img" )
+                    img.src = result.sprites.front_default
+
+                    const name = pokemon.querySelector( ".name" )
+                    name.innerText = result.name
+
+                    const types = pokemon.querySelector( ".types" )
+                    types.innerHTML = ""
+
+                    result.types.forEach( type => {
+                        const element = document.createElement( "img" )
+                        element.src = `https://pokeguide.neocities.org/Pic/${type.type.name}icon.png`
+                        types.appendChild( element )
+                    } )
+                } )
+        } )
+    </script>
+</body>
+
+</html>

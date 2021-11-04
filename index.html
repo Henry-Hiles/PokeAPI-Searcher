@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" asp-append-version="true" href="/site.css" />
+    <title>PokéAPI</title>
+</head>
+
+<body>
+    <div>
+        <h1>PokeAPI</h1>
+        <h3>Pokémon</h3>
+
+        <div id="cards"></div>
+        <script>
+
+            fetch( `https://pokeapi.co/api/v2/pokemon?limit=20` )
+                .then( response => {
+                    return response.json()
+                } )
+                .then( result => {
+                    result.results.forEach( pokemon => {
+                        fetch( pokemon.url )
+                            .then( response => {
+                                return response.json()
+                            } )
+                            .then( result => {
+                                const card = document.createElement( "div" )
+                                card.classList.add( "pokemon" )
+                                const pokemonImage = document.createElement( "img" )
+                                pokemonImage.src = result.sprites.front_default
+                                pokemonImage.classList.add( "img" )
+                                card.appendChild( pokemonImage )
+                                const name = document.createElement( "h2" )
+                                name.classList.add( "name" )
+                                name.innerText = result.name
+                                card.appendChild( name )
+                                const types = document.createElement( "div" )
+                                types.classList.add( "types" )
+                                result.types.forEach( type => {
+                                    const img = document.createElement( "img" )
+                                    img.src = `https://pokeguide.neocities.org/Pic/${type.type.name}icon.png`
+                                    types.appendChild( img )
+                                } )
+                                card.appendChild( types )
+                                document.querySelector( "#cards" ).appendChild( card )
+                            } )
+                    } )
+                } )
+        </script>
+</body>
+
+</html>
