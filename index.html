@@ -11,44 +11,87 @@
 <body>
     <div>
         <h1>PokeAPI</h1>
+
+        <label for="select">Region</label>
+
+        <select id="select">
+            <option selected>All Pokemon</option>
+        </select>
+
         <h3>Pokémon</h3>
 
-        <div id="cards"></div>
-        <script>
+        <div id="cards">
+        </div>
+        <button class="see-more" id="more">See More</button>
 
-            fetch( `https://pokeapi.co/api/v2/pokemon?limit=20` )
-                .then( response => {
-                    return response.json()
-                } )
-                .then( result => {
-                    result.results.forEach( pokemon => {
-                        fetch( pokemon.url )
-                            .then( response => {
-                                return response.json()
-                            } )
-                            .then( result => {
-                                const card = document.createElement( "div" )
-                                card.classList.add( "pokemon" )
-                                const pokemonImage = document.createElement( "img" )
-                                pokemonImage.src = result.sprites.front_default
-                                pokemonImage.classList.add( "img" )
-                                card.appendChild( pokemonImage )
-                                const name = document.createElement( "h2" )
-                                name.classList.add( "name" )
-                                name.innerText = result.name
-                                card.appendChild( name )
-                                const types = document.createElement( "div" )
-                                types.classList.add( "types" )
-                                result.types.forEach( type => {
-                                    const img = document.createElement( "img" )
-                                    img.src = `https://pokeguide.neocities.org/Pic/${type.type.name}icon.png`
-                                    types.appendChild( img )
-                                } )
-                                card.appendChild( types )
-                                document.querySelector( "#cards" ).appendChild( card )
-                            } )
+        <template>
+            <div class="pokemon">
+                <img data-image class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                <h2 data-name>
+                    <div class="skeleton skeleton-text"></div>
+                </h2>
+                <div data-types>
+                    <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                    <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                </div>
+            </div>
+        </template>
+        <script>
+            const pokemonCount = 12
+            const cards = document.querySelector( "#cards" )
+            const more = document.querySelector( "#more" )
+            const template = document.querySelector( "template" )
+            let offset = 0;
+            const addPokemon = () => {
+                for ( let i = 0; i < pokemonCount; i++ ) {
+                    cards.append( template.content.cloneNode( true ) )
+                }
+                fetch( `https://pokeapi.co/api/v2/pokemon?limit=${pokemonCount}&offset=${offset}` )
+                    .then( response => {
+                        return response.json()
                     } )
-                } )
+                    .then( async result => {
+                        for ( let i = 0; i < pokemonCount; i++ ) {
+                            const pokemon = result.results[i]
+                            await fetch( pokemon.url )
+                                .then( response => {
+                                    return response.json()
+                                } )
+                                .then( result => {
+                                    const card = cards.children.item( offset + i )
+                                    const img = card.querySelector( "[data-image]" )
+                                    img.src = result.sprites.front_default
+                                    img.addEventListener( 'load', () => img.classList.remove( "skeleton" ) )
+                                    card.querySelector( "[data-name]" ).textContent = result.name
+
+                                    const types = card.querySelector( "[data-types]" )
+                                    for ( let i = 0; i < result.types.length; i++ ) {
+                                        const type = result.types[i];
+                                        const img = card.querySelector( "[data-types]" ).children.item( i )
+                                        img.src = ( type.type.name == "psychic" ) ? "https://pokeguide.neocities.org/Pic/physicicon.png" : `https://pokeguide.neocities.org/Pic/${type.type.name}icon.png`
+                                    }
+                                    types.childNodes.forEach( type => type.complete && type.naturalHeight !== 0 ? type.classList.remove( "skeleton" ) : type.addEventListener( 'load', () => type.classList.remove( "skeleton" ) ) )
+                                } )
+                        }
+                        offset += pokemonCount
+                        if ( !result.next ) more.classList.add( "hidden" )
+                    } )
+            }
+
+            addPokemon()
+            more.addEventListener( "click", () => addPokemon() )
+
+            const checkForNewDiv = () => {
+                const more = document.querySelector( "#more" );
+                const moreOffset = more.offsetTop + more.clientHeight;
+                const pageOffset = window.pageYOffset + window.innerHeight;
+
+                if ( pageOffset > moreOffset - 20 ) {
+                    addPokemon()
+                }
+            };
+
+            document.addEventListener( "scroll", () => checkForNewDiv() );
         </script>
 </body>
 

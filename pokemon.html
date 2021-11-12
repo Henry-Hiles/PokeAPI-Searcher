@@ -16,12 +16,10 @@
             <option selected disabled>Please choose a Pokémon</option>
         </select>
 
-        <div class="pokemon not-loaded">
-            <img class="img">
-            <h2 class="name"></h2>
-            <div class="types">
-
-            </div>
+        <div class="pokemon not-loaded" data-pokemon>
+            <img data-image>
+            <h2 data-name></h2>
+            <div data-types></div>
         </div>
     </div>
     <script>
@@ -34,9 +32,9 @@
             .then( result => {
                 result.results.forEach( pokemon => {
                     const element = document.createElement( "option" )
-                    element.innerText = pokemon.name
+                    element.textContent = pokemon.name
                     element.value = pokemon.url
-                    select.appendChild( element )
+                    select.append( element )
                 } )
                 select.disabled = false
             } )
@@ -47,21 +45,20 @@
                     return response.json()
                 } )
                 .then( result => {
-                    const pokemon = document.querySelector( ".pokemon" )
+                    const pokemon = document.querySelector( "[data-pokemon]" )
                     pokemon.classList.remove( "not-loaded" )
-                    const img = pokemon.querySelector( ".img" )
-                    img.src = result.sprites.front_default
 
-                    const name = pokemon.querySelector( ".name" )
-                    name.innerText = result.name
+                    pokemon.querySelector( "[data-image]" ).src = result.sprites.front_default
 
-                    const types = pokemon.querySelector( ".types" )
+                    pokemon.querySelector( "[data-name]" ).textContent = result.name
+
+                    const types = pokemon.querySelector( "[data-types]" )
                     types.innerHTML = ""
 
                     result.types.forEach( type => {
                         const element = document.createElement( "img" )
                         element.src = `https://pokeguide.neocities.org/Pic/${type.type.name}icon.png`
-                        types.appendChild( element )
+                        types.append( element )
                     } )
                 } )
         } )
