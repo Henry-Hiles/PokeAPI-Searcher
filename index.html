@@ -31,8 +31,12 @@
                     <div class="skeleton skeleton-text"></div>
                 </h2>
                 <div data-types>
-                    <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
-                    <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                    <div>
+                        <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                    </div>
+                    <div>
+                        <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                    </div>
                 </div>
             </div>
         </template>
@@ -60,10 +64,18 @@
                     const types = card.querySelector( "[data-types]" )
                     for ( let i = 0; i < pokemon.types.length; i++ ) {
                         const type = pokemon.types[i];
-                        const img = card.querySelector( "[data-types]" ).children.item( i )
-                        img.src = ( type.type.name == "psychic" ) ? "https://pokeguide.neocities.org/Pic/physicicon.png" : `https://pokeguide.neocities.org/Pic/${type.type.name}icon.png`
+                        const img = card.querySelector( "[data-types]" ).children.item( i ).children.item( 0 )
+                        img.src = `images/${type.type.name}.png`
                     }
-                    types.childNodes.forEach( type => type.complete && type.naturalHeight !== 0 ? type.classList.remove( "skeleton" ) : type.addEventListener( 'load', () => type.classList.remove( "skeleton" ) ) )
+                    for ( let i = 0; i < types.children.length; i++ ) {
+                        const type = types.children.item( i );
+                        if ( type.children.item( 0 ).complete && type.children.item( 0 ).naturalHeight !== 0 ) {
+                            type.children.item( 0 ).classList.remove( "skeleton" )
+                        }
+                        else {
+                            type.children.item( 0 ).addEventListener( 'load', () => type.children.item( 0 ).classList.remove( "skeleton" ) )
+                        }
+                    }
                 }
 
                 for ( let i = 0; i < pokemonCount; i++ ) await addCard( i )

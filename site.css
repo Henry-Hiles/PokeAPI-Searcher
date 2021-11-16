@@ -63,11 +63,14 @@ select * {
 }
 [data-types] img {
 	border-radius: 20px;
-	height: 90px;
+	height: 25px;
 	margin: 10px auto;
-	width: 230px;
+	width: 25px;
 	display: block;
 }
+/* [data-types] div {
+
+} */
 #cards {
 	display: flex;
 	flex-wrap: wrap;
