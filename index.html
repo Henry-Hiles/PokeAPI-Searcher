@@ -20,8 +20,7 @@
 
         <h3>Pokémon</h3>
 
-        <div id="cards">
-        </div>
+        <div id="cards"></div>
         <button class="see-more" id="more">See More</button>
 
         <template>
@@ -33,9 +32,11 @@
                 <div data-types>
                     <div>
                         <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                        <span class="skeleton skeleton-text type-name"></span>
                     </div>
                     <div>
                         <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                        <span class="skeleton skeleton-text type-name"></span>
                     </div>
                 </div>
             </div>
@@ -46,7 +47,9 @@
             const more = document.querySelector( "#more" )
             const template = document.querySelector( "template" )
             let currentOffset = 0;
-            const addPokemon = async ( offset ) => {
+            const addPokemon = async () => {
+                const offset = currentOffset
+                currentOffset += pokemonCount
                 for ( let i = 0; i < pokemonCount; i++ ) {
                     cards.append( template.content.cloneNode( true ) )
                 }
@@ -55,52 +58,48 @@
                 const addCard = async i => {
                     const pokemonResponse = await fetch( result.results[i].url )
                     const pokemon = await pokemonResponse.json()
-                    const card = cards.children.item( offset + i )
+                    const card = cards.children[offset + i]
                     const img = card.querySelector( "[data-image]" )
-                    img.src = pokemon.sprites.front_default
+                    const types = card.querySelector( "[data-types]" )
                     img.addEventListener( 'load', () => img.classList.remove( "skeleton" ) )
+                    img.src = pokemon.sprites.front_default
                     card.querySelector( "[data-name]" ).textContent = pokemon.name
 
-                    const types = card.querySelector( "[data-types]" )
-                    for ( let i = 0; i < pokemon.types.length; i++ ) {
-                        const type = pokemon.types[i];
-                        const img = card.querySelector( "[data-types]" ).children.item( i ).children.item( 0 )
-                        img.src = `images/${type.type.name}.png`
+                    //console.log( types.children )
+
+                    if ( pokemon.types.length == 1 ) {
+                        types.children[1].remove()
                     }
-                    for ( let i = 0; i < types.children.length; i++ ) {
-                        const type = types.children.item( i );
-                        if ( type.children.item( 0 ).complete && type.children.item( 0 ).naturalHeight !== 0 ) {
-                            type.children.item( 0 ).classList.remove( "skeleton" )
-                        }
-                        else {
-                            type.children.item( 0 ).addEventListener( 'load', () => type.children.item( 0 ).classList.remove( "skeleton" ) )
-                        }
-                    }
+
+                    pokemon.types.forEach( ( type, i ) => {
+                        const typeElement = types.children[i]
+                        const typeName = type.type.name
+                        const typeImage = typeElement.children[0]
+                        typeImage.addEventListener( 'load', () => typeImage.classList.remove( "skeleton" ) )
+                        typeImage.src = `images/${typeName}.png`
+                        const typeNameElement = typeElement.children[1]
+                        typeNameElement.innerText = typeName
+                        typeNameElement.classList.remove( "skeleton", "skeleton-text" )
+                    } );
                 }
 
-                for ( let i = 0; i < pokemonCount; i++ ) await addCard( i )
+                [...Array( pokemonCount )].forEach( ( _, i ) => addCard( i ) )
                 if ( !result.next ) more.classList.add( "hidden" )
             }
 
-            addPokemon( currentOffset )
+            addPokemon()
 
-            more.addEventListener( "click", () => {
-                addPokemon( currentOffset )
-                currentOffset += pokemonCount
-            } )
+            more.addEventListener( "click", addPokemon )
 
             const checkForMorePokemon = async () => {
-                const more = document.querySelector( "#more" );
-                const moreOffset = more.offsetTop + more.clientHeight;
-                const pageOffset = window.pageYOffset + window.innerHeight;
+                const more = document.querySelector( "#more" )
+                const moreOffset = more.offsetTop + more.clientHeight
+                const pageOffset = window.pageYOffset + window.innerHeight
 
-                if ( pageOffset > moreOffset - 20 ) {
-                    addPokemon( currentOffset )
-                    currentOffset += pokemonCount
-                }
-            };
+                if ( pageOffset > moreOffset - 20 ) addPokemon()
+            }
 
-            document.addEventListener( "scroll", () => checkForMorePokemon() );
+            document.addEventListener( "scroll", checkForMorePokemon )
         </script>
 </body>
 
