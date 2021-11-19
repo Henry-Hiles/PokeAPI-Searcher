@@ -37,8 +37,12 @@ select * {
 	border: 1px solid var(--secondary);
 	border-radius: 20px;
 	margin: auto;
-	min-width: 300px;
+	background-color: #a9dff1;
+	width: 300px;
 	padding: 20px;
+}
+[data-types] div, [data-image]{
+	background-color: #e0f1f7;
 }
 .skeleton {
 	animation: skeleton-loading 1s linear infinite alternate;
@@ -51,15 +55,16 @@ select * {
 	border: 1px solid var(--secondary);
 	height: 260px;
 	margin: auto;
-	margin-top: 30px;
+	border-radius: 5px;
 	width: 260px;
 }
 [data-name] {
 	margin: auto;
 	margin-bottom: 5px;
 	text-transform: capitalize;
-	width: 90%;
-	word-wrap: break-word;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }
 [data-types] img {
 	border-radius: 20px;
@@ -75,18 +80,21 @@ select * {
 	padding: 2px 2px;
 	width: 45%;
 }
+.single-card {
+	width: 200px;
+	margin: 20px auto;
+}
 [data-types] .type-name {
 	display: inline;
 	font-weight: 450;
 	margin: 0 5px;
 	font-size: 20px;
-	
 	text-transform: capitalize;
 }
 #cards {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 10px;
+	gap: 20px;
 	justify-content: center;
 	margin: 0 50px;
 }
@@ -136,5 +144,5 @@ a:hover, .see-more:hover {
 	cursor: pointer;
 }
 .hidden {
-	display: none;
+	visibility: hidden;
 }

@@ -12,60 +12,87 @@
     <div>
         <h1>PokeAPI</h1>
 
-        <label for="select">Region</label>
+        <label for="pokedex">Pokedex</label>
 
-        <select id="select">
-            <option selected>All Pokemon</option>
+        <select id="pokedex">
+        </select>
+
+        <label for="type">Type</label>
+
+        <select id="type">
+            <option selected value="">All Types</option>
         </select>
 
         <h3>Pokémon</h3>
 
         <div id="cards"></div>
         <button class="see-more" id="more">See More</button>
+    </div>
 
-        <template>
-            <div class="pokemon">
-                <img data-image class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
-                <h2 data-name>
-                    <div class="skeleton skeleton-text"></div>
-                </h2>
-                <div data-types>
-                    <div>
-                        <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
-                        <span class="skeleton skeleton-text type-name"></span>
-                    </div>
-                    <div>
-                        <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
-                        <span class="skeleton skeleton-text type-name"></span>
-                    </div>
+    <template>
+        <div class="pokemon">
+            <img data-image class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+            <h2 data-name>
+                <div class="skeleton skeleton-text"></div>
+            </h2>
+            <div data-types>
+                <div>
+                    <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                    <span class="skeleton skeleton-text type-name"></span>
+                </div>
+                <div>
+                    <img class="skeleton" src="https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png">
+                    <span class="skeleton skeleton-text type-name"></span>
                 </div>
             </div>
-        </template>
-        <script>
-            const pokemonCount = 12
-            const cards = document.querySelector( "#cards" )
+        </div>
+    </template>
+
+    <script>
+        const pokemonCount = 12
+        const cards = document.querySelector( "#cards" )
+        const more = document.querySelector( "#more" )
+        const template = document.querySelector( "template" )
+        const pokedexSelect = document.querySelector( "#pokedex" )
+        const typeSelect = document.querySelector( "#type" )
+        let pokedex = null
+        let type = null
+        let disabledLoading = false
+        let currentOffset = 0;
+
+        const checkForMorePokemon = async () => {
             const more = document.querySelector( "#more" )
-            const template = document.querySelector( "template" )
-            let currentOffset = 0;
-            const addPokemon = async () => {
-                const offset = currentOffset
-                currentOffset += pokemonCount
-                for ( let i = 0; i < pokemonCount; i++ ) {
-                    cards.append( template.content.cloneNode( true ) )
-                }
-                const response = await fetch( `https://pokeapi.co/api/v2/pokemon?limit=${pokemonCount}&offset=${offset}` )
-                const result = await response.json()
-                const addCard = async i => {
-                    const pokemonResponse = await fetch( result.results[i].url )
-                    const pokemon = await pokemonResponse.json()
+            const moreOffset = more.offsetTop + more.clientHeight
+            const pageOffset = window.pageYOffset + window.innerHeight
+
+            if ( pageOffset > moreOffset - 20 ) addPokemon()
+        }
+
+        const addPokemon = async () => {
+            if ( disabledLoading ) return
+            const offset = currentOffset
+            currentOffset += pokemonCount
+            const pokemonUrls = []
+            if ( type && pokedex.name != "national" ) {
+                pokedex.pokemon_entries.forEach( entry => {
+                    const url = entry.pokemon_species.url.replace( "-species", "" )
+                    type.pokemon.forEach( typePokemon => {
+                        if ( typePokemon.pokemon.url == url ) {
+                            pokemonUrls.push( typePokemon )
+                        }
+                    } )
+                } )
+            }
+            const addCard = async i => {
+                try {
+                    const pokemonResponse = await fetch( type ? ( pokemonUrls.length ? pokemonUrls : type.pokemon )[i + offset].pokemon.url : pokedex.pokemon_entries[i + offset].pokemon_species.url.replace( "-species", "" ) )
+                    pokemon = await pokemonResponse.json()
                     const card = cards.children[offset + i]
                     const img = card.querySelector( "[data-image]" )
                     const types = card.querySelector( "[data-types]" )
                     img.addEventListener( 'load', () => img.classList.remove( "skeleton" ) )
                     img.src = pokemon.sprites.front_default
                     card.querySelector( "[data-name]" ).textContent = pokemon.name
-
-                    //console.log( types.children )
 
                     if ( pokemon.types.length == 1 ) {
                         types.children[1].remove()
@@ -81,26 +108,68 @@
                         typeNameElement.innerText = typeName
                         typeNameElement.classList.remove( "skeleton", "skeleton-text" )
                     } );
+                } catch ( error ) {
+                    console.log( error )
                 }
-
-                [...Array( pokemonCount )].forEach( ( _, i ) => addCard( i ) )
-                if ( !result.next ) more.classList.add( "hidden" )
             }
+            [...Array( pokemonCount )].forEach( ( _, i ) => {
+                if ( !disabledLoading ) {
+                    if ( i + offset == ( pokemonUrls.length || ( type ? type.pokemon.length : pokedex.pokemon_entries.length ) ) ) {
+                        disabledLoading = true
+                        more.classList.add( "hidden" )
+                    }
+                    else {
+                        cards.append( template.content.cloneNode( true ) )
+                        addCard( i ).catch( error => console.log( error ) )
+                    }
+                }
+            } )
+        }
+        ( async () => {
+            const defaultPokedex = await fetch( "https://pokeapi.co/api/v2/pokedex/1/" )
+            pokedex = await defaultPokedex.json()
+            const pokedexResponse = await fetch( `https://pokeapi.co/api/v2/pokedex?limit=9999` )
+            const pokedexResult = await pokedexResponse.json()
+            pokedexResult.results.forEach( pokedex => {
+                const option = document.createElement( "option" )
+                option.innerText = pokedex.name
+                option.value = pokedex.url
+                pokedexSelect.append( option )
+            } )
 
+            const typeResponse = await fetch( `https://pokeapi.co/api/v2/type` )
+            const typeResult = await typeResponse.json()
+            typeResult.results.sort( ( previous, current ) => ( previous.name > current.name ) ? 1 : ( ( current.name > previous.name ) ? -1 : 0 ) )
+            typeResult.results.forEach( type => {
+                const option = document.createElement( "option" )
+                option.innerText = type.name
+                option.value = type.url
+                typeSelect.append( option )
+            } )
             addPokemon()
 
             more.addEventListener( "click", addPokemon )
-
-            const checkForMorePokemon = async () => {
-                const more = document.querySelector( "#more" )
-                const moreOffset = more.offsetTop + more.clientHeight
-                const pageOffset = window.pageYOffset + window.innerHeight
-
-                if ( pageOffset > moreOffset - 20 ) addPokemon()
-            }
-
             document.addEventListener( "scroll", checkForMorePokemon )
-        </script>
+        } )()
+
+        typeSelect.addEventListener( "change", async event => {
+            const responce = await fetch( event.target.value )
+            type = await responce.json()
+            cards.innerHTML = ""
+            currentOffset = 0
+            disabledLoading = false
+            addPokemon()
+        } )
+
+        pokedexSelect.addEventListener( "change", async event => {
+            const responce = await fetch( event.target.value )
+            pokedex = await responce.json()
+            cards.innerHTML = ""
+            currentOffset = 0
+            disabledLoading = false
+            addPokemon()
+        } )
+    </script>
 </body>
 
 </html>
