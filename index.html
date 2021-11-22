@@ -14,13 +14,12 @@
 
         <label for="pokedex">Pokedex</label>
 
-        <select id="pokedex">
-        </select>
+        <select id="pokedex"></select>
 
         <label for="type">Type</label>
 
         <select id="type">
-            <option selected value="">All Types</option>
+            <option selected value="all">All Types</option>
         </select>
 
         <h3>Pokémon</h3>
@@ -141,6 +140,7 @@
             const typeResult = await typeResponse.json()
             typeResult.results.sort( ( previous, current ) => ( previous.name > current.name ) ? 1 : ( ( current.name > previous.name ) ? -1 : 0 ) )
             typeResult.results.forEach( type => {
+                if ( type.name == "shadow" || type.name == "unknown" ) return
                 const option = document.createElement( "option" )
                 option.innerText = type.name
                 option.value = type.url
@@ -153,8 +153,13 @@
         } )()
 
         typeSelect.addEventListener( "change", async event => {
-            const responce = await fetch( event.target.value )
-            type = await responce.json()
+            if ( event.target.value != "all" ) {
+                const responce = await fetch( event.target.value )
+                type = await responce.json()
+            }
+            else {
+                type = null
+            }
             cards.innerHTML = ""
             currentOffset = 0
             disabledLoading = false
@@ -164,6 +169,7 @@
         pokedexSelect.addEventListener( "change", async event => {
             const responce = await fetch( event.target.value )
             pokedex = await responce.json()
+
             cards.innerHTML = ""
             currentOffset = 0
             disabledLoading = false
