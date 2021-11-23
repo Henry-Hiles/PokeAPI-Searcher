@@ -34,14 +34,14 @@ select * {
 	display: none;
 }
 .pokemon {
+	background-color: #a9dff1;
 	border: 1px solid var(--secondary);
 	border-radius: 20px;
 	margin: auto;
-	background-color: #a9dff1;
-	width: 300px;
 	padding: 20px;
+	width: 300px;
 }
-[data-types] div, [data-image]{
+[data-types] div, [data-image] {
 	background-color: #e0f1f7;
 }
 .skeleton {
@@ -53,25 +53,25 @@ select * {
 }
 [data-image] {
 	border: 1px solid var(--secondary);
+	border-radius: 5px;
 	height: 260px;
 	margin: auto;
-	border-radius: 5px;
 	width: 260px;
 }
 [data-name] {
 	margin: auto;
 	margin-bottom: 5px;
-	text-transform: capitalize;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 	overflow: hidden;
+	text-overflow: ellipsis;
+	text-transform: capitalize;
+	white-space: nowrap;
 }
 [data-types] img {
 	border-radius: 20px;
 	height: 25px;
 	width: 25px;
 }
-[data-types] > div {
+[data-types] > button {
 	align-items: center;
 	border: 1px solid var(--secondary);
 	border-radius: 25px;
@@ -80,15 +80,19 @@ select * {
 	padding: 2px 2px;
 	width: 45%;
 }
+[data-types] > button:hover {
+	filter: brightness(90%);
+	cursor: pointer;
+}
 .single-card {
-	width: 200px;
 	margin: 20px auto;
+	width: 200px;
 }
 [data-types] .type-name {
 	display: inline;
+	font-size: 20px;
 	font-weight: 450;
 	margin: 0 5px;
-	font-size: 20px;
 	text-transform: capitalize;
 }
 #cards {
@@ -144,5 +148,8 @@ a:hover, .see-more:hover {
 	cursor: pointer;
 }
 .hidden {
-	visibility: hidden;
+	display: none;
+}
+#none {
+	color: #6c757d;
 }
