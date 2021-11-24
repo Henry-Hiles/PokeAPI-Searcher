@@ -50,6 +50,8 @@
     <script>
         const pokemonCount = 12
         const url = new URL( window.location.href )
+        const urlPokedex = url.searchParams.get( "pokedex" )
+        const urlType = url.searchParams.get( "type" )
         const cards = document.querySelector( "#cards" )
         const more = document.querySelector( "#more" )
         const template = document.querySelector( "template" )
@@ -115,7 +117,7 @@
                     pokemon.types.forEach( ( type, i ) => {
                         const typeElement = types.children[i]
                         typeElement.addEventListener( "click", () => {
-                            typeSelect.value = type.type.url
+                            typeSelect.value = type.type.url.substring( 31, type.type.url.length - 1 )
                             changeType()
                         } )
                         const typeName = type.type.name
@@ -141,7 +143,7 @@
             } )
         }
         ( async () => {
-            const defaultPokedex = await fetch( "https://pokeapi.co/api/v2/pokedex/1/" )
+            const defaultPokedex = await fetch( `https://pokeapi.co/api/v2/pokedex/${urlPokedex || 1}/` )
             pokedex = await defaultPokedex.json()
             const pokedexResponse = await fetch( `https://pokeapi.co/api/v2/pokedex?limit=9999` )
             const pokedexResult = await pokedexResponse.json()
@@ -151,6 +153,7 @@
                 option.value = pokedex.url.substring( 34, pokedex.url.length - 1 )
                 pokedexSelect.append( option )
             } )
+            if ( urlPokedex ) pokedexSelect.value = urlPokedex
 
             const typeResponse = await fetch( `https://pokeapi.co/api/v2/type` )
             const typeResult = await typeResponse.json()
@@ -161,6 +164,10 @@
                 option.value = type.url.substring( 31, type.url.length - 1 )
                 typeSelect.append( option )
             } )
+            if ( urlType ) {
+                typeSelect.value = urlType
+                changeType()
+            }
             addPokemon()
 
             more.addEventListener( "click", addPokemon )
@@ -169,27 +176,34 @@
 
         const changeType = async () => {
             if ( typeSelect.value != "all" ) {
-                const responce = await fetch( `https://pokeapi.co/api/v2/type/${event.target.value}` )
+                url.searchParams.set( "type", typeSelect.value )
+                const responce = await fetch( `https://pokeapi.co/api/v2/type/${typeSelect.value}/` )
                 type = await responce.json()
             }
             else {
+                url.searchParams.delete( "type" )
                 type = null
             }
             cards.innerHTML = ""
             currentOffset = 0
             disabledLoading = false
+            url.search = url.searchParams.toString()
+            history.replaceState( null, '', url )
             addPokemon()
         }
 
         typeSelect.addEventListener( "change", async () => await changeType() )
 
-        pokedexSelect.addEventListener( "change", async event => {
-            const responce = await fetch( `https://pokeapi.co/api/v2/pokedex/${event.target.value}/` )
+        pokedexSelect.addEventListener( "change", async () => {
+            pokedexSelect.value == 1 ? url.searchParams.delete( "pokedex" ) : url.searchParams.set( "pokedex", pokedexSelect.value )
+            const responce = await fetch( `https://pokeapi.co/api/v2/pokedex/${pokedexSelect.value}/` )
             pokedex = await responce.json()
 
             cards.innerHTML = ""
             currentOffset = 0
             disabledLoading = false
+            url.search = url.searchParams.toString()
+            history.replaceState( null, '', url )
             addPokemon()
         } )
     </script>
